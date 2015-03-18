@@ -1,4 +1,4 @@
-# SQL és Adatbázisok Workshop II.
+# SQL és Adatbázisok Workshop II. (pgsql)
 
 1. Mennyi közös `VIN` található a `TVin1` és `TVin2` tábla között?
 

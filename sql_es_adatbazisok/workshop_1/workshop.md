@@ -1,4 +1,4 @@
-# SQL és Adatbázisok Workshop I.
+# SQL és Adatbázisok Workshop I. (pgsql)
 
 
 1. Másold le az adatbázist `<prefix>_email_history` és `<prefix>_user` néven.

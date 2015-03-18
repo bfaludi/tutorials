@@ -1,1 +1,0 @@
-metl user.yml && metl email_history.yml
