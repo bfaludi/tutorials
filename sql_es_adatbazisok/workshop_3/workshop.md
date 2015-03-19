@@ -140,8 +140,127 @@
 			);
 			
 14. Előbbi feladat kiegészítve, hogy az aktuális `Email` cím mellett vizsgáljuk az utóbbi két hónapban felvitt Email címeket is. Ha volt közös email cím tekintsük találatnak.
+	
+	Azon rekordok listája, ahol az email címben van átfedés.
+	
+		SELECT
+			h1.user_id AS `uid1`,
+			h2.user_id AS `uid2`
+		FROM
+			t_email_history AS h1
+		JOIN
+			t_email_history AS h2 ON ( 
+				h1.email = h2.email
+				AND
+				h1.user_id > h2.user_id
+				AND
+				COALESCE( h2.updated, h2.created ) >= DATE_SUB( CURDATE(), INTERVAL 2 MONTH )
+			)
+		WHERE
+			COALESCE( h1.updated, h1.created ) >= DATE_SUB( CURDATE(), INTERVAL 2 MONTH )
+		GROUP BY
+			1,2;
+			
+	Azon rekordok listája, ahol az aktuális email cím és a history-ban van átfedés.
+	
+		SELECT
+			GREATEST( h.user_id, u.id ) AS `uid1`,
+			LEAST( h.user_id, u.id ) AS `uid2`
+		FROM
+			t_email_history AS h
+		JOIN
+			t_user AS u ON ( 
+				h.email = u.email
+				AND
+				h.user_id != u.id
+			)
+		WHERE
+			COALESCE( h.updated, h.created ) >= DATE_SUB( CURDATE(), INTERVAL 2 MONTH )
+		GROUP BY
+			1,2;
 
-	Nem nézünk rá példát, mivel megvalósítása horror, hisz a MySQL nem kezeli az ARRAY típust, így overlap-ot string-ek között kellene nézni. Megoldásához sok Temporary tábla szükséges, vagy nagyon sok halmazműveleti függvény.
+	Azon rekordok listája, ahol az aktuális email címek megegyeznek.
+	
+		SELECT
+			u1.id AS `uid1`,
+			u2.id AS `uid2`
+		FROM
+			t_user AS u1
+		JOIN
+			t_user AS u2 ON ( 
+				u1.id > u2.id
+				AND
+				u1.email = u2.email
+			)
+		GROUP BY
+			1,2;
+			
+	Tehát a következő a összerakva a megfelelő feltételekkel:
+		
+		SELECT
+		    *
+		FROM
+		    t_user AS u1,
+		    t_user AS u2,
+		    (
+		        SELECT
+		            h1.user_id AS `uid1`,
+		            h2.user_id AS `uid2`
+		        FROM
+		            t_email_history AS h1
+		        JOIN
+		            t_email_history AS h2 ON ( 
+		                h1.email = h2.email
+		                AND
+		                h1.user_id > h2.user_id
+		                AND
+		                COALESCE( h2.updated, h2.created ) >= DATE_SUB( CURDATE(), INTERVAL 2 MONTH )
+		            )
+		        WHERE
+		            COALESCE( h1.updated, h1.created ) >= DATE_SUB( CURDATE(), INTERVAL 2 MONTH )
+		        GROUP BY
+		            1,2
+		        UNION
+		        SELECT
+		            GREATEST( h.user_id, u.id ) AS `uid1`,
+		            LEAST( h.user_id, u.id ) AS `uid2`
+		        FROM
+		            t_email_history AS h
+		        JOIN
+		            t_user AS u ON ( 
+		                h.email = u.email
+		                AND
+		                h.user_id != u.id
+		            )
+		        WHERE
+		            COALESCE( h.updated, h.created ) >= DATE_SUB( CURDATE(), INTERVAL 2 MONTH )
+		        GROUP BY
+		            1,2
+		        UNION
+		        SELECT
+		            u1.id AS `uid1`,
+		            u2.id AS `uid2`
+		        FROM
+		            t_user AS u1
+		        JOIN
+		            t_user AS u2 ON ( 
+		                u1.id > u2.id
+		                AND
+		                u1.email = u2.email
+		            )
+		        GROUP BY
+		            1,2
+		    ) vw
+		WHERE
+		    u1.id = vw.uid1
+		    AND
+		    u2.id = vw.uid2
+			AND
+		    (
+		        u1.firstname = u2.firstname
+		        OR
+		        u1.lastname = u2.lastname
+		    );
 
 15. Mennyi közös `VIN` található a `TVin1` és `TVin2` tábla között?
 
