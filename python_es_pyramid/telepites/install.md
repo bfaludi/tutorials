@@ -54,12 +54,13 @@
 
 ### **Linux & Fedora & Mac**:
     
-    $ pip install virtualenv & virtualenvwrapper
-	$ nano ~/.bachrc
-    
+    $ pip install virtualenv virtualenvwrapper
+    $ nano ~/.bashrc VAGY nano ~/.bash_profile
+      # következő sorokat add hozzá a végére
       export WORKON_HOME=$HOME/.virtualenvs
       export PROJECT_HOME=$HOME/<ProjectFolder>
       source /usr/local/bin/virtualenvwrapper.sh
+    $ source ~/.bashrc VAGY source ~/.bash_profile
 
 #### Használata virtualenv wrapper-rel:
     
@@ -110,7 +111,7 @@
 
 #### **Linux**: ([link](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-14-04))
     
-    $ sudo apt-get install postgresql postgresql-contrib 
+    $ sudo apt-get install postgresql postgresql-contrib postgresql-server-dev-<version -> 9.3> 
     	
  
     
@@ -168,9 +169,12 @@
 ### init py kiegészítése:
 
 #### **config = Configurator(settings=settings) alá:**
-    
+    # ezeket hozzáadni kell
     config.include( 'pyramid_jinja2' )
     config.add_jinja2_extension('jinja2.ext.do')
+    # ezt pedig kitörölni
+    config.include('pyramid_chameleon')
+
 
 
 
