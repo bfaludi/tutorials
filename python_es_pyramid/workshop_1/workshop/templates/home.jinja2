@@ -1,0 +1,12 @@
+{% extends 'base.jinja2' %}
+
+{% block title %}{{ project }}{% endblock %}
+
+{% block content %}
+<h1>Users</h1>
+{% for user in users %}
+<div>{{ user.name|safe }}{% if user.age %} ({{ user.age }}){% endif %}</div>
+{% else %}
+    No user found!
+{% endfor %}
+{% endblock %}
